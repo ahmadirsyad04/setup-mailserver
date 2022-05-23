@@ -1,2 +1,0 @@
-find . -type f -size +300M -exec du -sh {} \; > hasilcek.txt
-find /home -type f -name "*log*" -size +1G -exec ls -lah {} \;

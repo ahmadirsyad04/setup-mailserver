@@ -1,2 +1,0 @@
-1.Coba create VM 1 kvm  > pastikan ebtable
-2.Install mikrotik CHR
