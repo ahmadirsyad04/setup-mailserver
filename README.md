@@ -1,2 +1,2 @@
 # setup-mailserver
-Setup mailserver menggunakan postfix, devecot, spamassassin dan clamav (iRedMail)
+Setup mailserver menggunakan postfix, devecot, amavis dan clamav (iRedMail)
