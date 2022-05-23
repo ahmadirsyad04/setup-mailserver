@@ -1,0 +1,50 @@
+Todo list Sprint repo
+1.Buat kesimpulan mekanisme yang sudah dicoba
+	-Menggunakan command rsync :
+		rsync --exclude nama_file/folder > untuk exclude folder yang skip untuk di copy
+		rsync -avP --ignore-existing --update ./ root@cpaneldev.beon.co.id:/home/public-html.backstagingwhyalways/public_html/whmcs_main
+			Command ini akan mencopy file/folder yang terupdate dan ada penambahan file/folder saja, dan ignore copy file exisiting, namun tidak bisa update file/folder yang terdelete pada destination folder
+		rsync -atv --delete --progress ./ user@example.com:/var/www/html
+			Command rsync ini akan mendelete semua destination terlebih dahulu kemudian akan mencopy dari repo master ke destination folder, metode ini dalam pengukuran membutuhkan kurang lebih waktu 2 menit 7 second dg file sekarang di stagging
+	-Menggunakan git-pull :
+		Menjalankan command git pull langsung di server, metode ini cukup efektif terkait perubahan-perubahan yang terjadi pada repo master ketika update ke tujuan folder, namun metode ini masih belum berhasil terimplementasi ketika dijalankan dari pipeline, terkahir yang dicoba menggunakan ansible (kendala pada implementasi vault untuk komunikasi dengan server tujuan)
+		Git pull dibuat dengan metode pemanggilan script bash dari pipeline gitlab-ci, dengan membuat sebuah remote ke server tujuan 
+		Kumpulan scripting berada pada dir scripting, ada 2 file staging_pull.sh & prod_pull.sh
+2.Implementasi mekanisme yang dipilih
+	Menggunakan git-pull dengan pemanggilan command bash scripting dari pipeline gitlab-ci
+	File script berada pada dir scripting
+	Ada 2 file staging_pull.sh & prod_pull.sh yang masing-masing di declare pada pipeline
+	Kedua script ini menjalankan command cd (masuk dalam dir deploy) dan git pull
+3.Implementasi mekanisme baru ke repo fix
+	Repo fix berada di https://gitlab.com/j716/aplikasi-whmcs-master/whmcs_main_master
+4.uji coba implementasi
+Server untuk pengujian kali ini, staging : cpaneldev.beon.co.id & prod : controller.jagoanhosting.com (bisa disesuaikan kedepannya)
+Untuk menyesuaikan dir yang akan dideploy bisa edit scripting staging_pull.sh & prod_pull.sh
+Untuk menyesuaikan remote server yang akan dituju, edit pada bagian script "ssh root@controller.jagoanhosting.com 'bash -s' < ./scripting/prod_pull.sh" ini berhubungan dengan owner aplikasi didalamnya
+Ketika mengubah remote server pada script diatas tentunya yg perlu diperhatikan adalah public key user tsb harus juga di daftarkan di server gitlab begitu sebaliknya
+Public key runner harus di install di node master/dev (pada dir .ssh user deploy), jalan perintah ini :
+	echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDPYCMeXY4czPfeEuQQU8udf88FwMlMu+vRx9z61ebSfhvEq3OsTsiy41t/I2Sj+vAU05bXR0rYE1ki6eNZPO4WZrAG9NtBpiMAi4h+YdBiGN9ddQAgbSX428KbRNztobz7S1jtJR9Cj8YGmBCGl3En+U6HBmmm9zr8pH0C+VlvWBhrsGECCdx4/Zyyl8qha3NT0rUyTyMM/Km+lMxx21uWSpK43W/5o6gqJckRJ9tICKahUjWl5u33X+I5DYwysodXqNqTYydHr6x0mD12xdxANDqLfBuE+vLoHjn8BtV6VcWou7unV8Q1TMFiYIx0tO2mBmf5xIaLBBbfogT/9A9W5ou85QhJ/e0TUtFn8pY2UmtsZOBBv20IKJlUEHwmC+NGwQ/VZcOZX2vVLxOKmiEH+sD4GdGSHzukbZcAjYDPg0oSnqwurqC2Ju6treJL2pd7zQf1XEzNpMMZK3AUT2mnumHyELvx9pTL2jmpIzKGKk6IrzENPnXvF9/lEnrc25VPGCoxlKlVOiiOXi8pwO5ig05m1gZMoHuEK7BzfxlwqNRYTtxX8kHgcekst5m9SkauM3YXM0RWdxls0OYyxwgseIJB3D57uLUVoUKT0+p3kzAS5+ZEY4/h0KZlfvw08Iu1aOsjn4B8frWuJJ8x95UPbFp/O4u4g0vBrmFzeGt10Q== control" > $HOME/.ssh/authorized_keys
+Public key (user deploy) masing-masing server harus di install di deploy key gitlab menu setting > repository > deploy key
+
+Catatan untuk APP :
+Untuk tim apps, deploy langsung dari SFTP atau yang lain akan merusak susunan git, jadi di usahakan untuk deploy dari git
+
+File utama pipeline CI/CD
+.gitlab-ci.yml
+./scripting/
+
+Noted pribadi
+- masih sangsi imlementasi variabel pada key ssh, perlu didalami lagi
+
+- Cek ownership
+- run chown
+- run deploy pakai user dir (ownership)
+- Key digenerate khusus utk deploy
+- Catatan/notif utk app deploy langsung dari SFTP atau yang lain akan merusak susun git
+- Lakukan force misal ketika ada yg deploy manual
+- pull server = public key > git=private_key
+- ignore file git
+- Mendaftarkan key public ke deply key gitlab
+
+
+

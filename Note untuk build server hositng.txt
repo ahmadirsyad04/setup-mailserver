@@ -1,0 +1,12 @@
+1.Tinggal timeline waktu pengerjaan
+2.Data pendukung perlu ditata
+
+Catatan
+1.Cek versi PHP
+2.Buat query untuk menyesuaikan data pada WHMCS
+3.Cek hasil akses (DNS) pake tool validasi DNS sebelum migrasi
+	Jika NS mengarah ke DNS Cluster internal tidak perlu gnti A record
+	Jika NS mengarah ke cloudflare perlu gnti A record  
+4.Diskusi mekanisme migrasi untuk beberapa tahap di MOP
+5.Tanya deploy ansible kok error
+6.Tanya perbaikan ssl sven

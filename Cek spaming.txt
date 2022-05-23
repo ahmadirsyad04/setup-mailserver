@@ -1,0 +1,9 @@
+1.Cek mxlookup/HetrixTools.
+2.Bersihkan spam, antispam > log pengiriman cek > explorer di antispam dan server > teleport > lastpass antispam
+3.Gnti ip antispam
+
+Cek Di mxlooup > detail
+Gnti IP spam, enable > disable
+Ber clue masuk ke teleport antispam > ktika ada spam maka di masukkan sm anti spam di /var/spool/exim.in/blocked_relay
+ke antispam > message menu
+cek spam https://trello.com/c/bCl6iZi8/17268-hansipjagoanhostingcom-spam-detected-from-your-ip-address-667017659

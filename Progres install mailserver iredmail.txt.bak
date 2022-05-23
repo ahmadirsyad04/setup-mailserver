@@ -1,0 +1,117 @@
+========Instalasi dan configurasi Iredmail===========
+
+Setting hostname edit /etc/hostname 
+# mx
+Edit pada /etc/hosts 
+# 127.0.0.1   mx.domainsaya.com mx localhost localhost.localdomain
+Cek dengan hostname -f
+root@mx:~# hostname -f
+mx.domainsaya.com
+
+Install gzip apt-get install gzip > untuk keperluan extract file archive iredmail
+Buat dir untuk menampung file hasil download
+# mkdir -p /home/download
+# cd /home/download
+
+Download latest release iredmail 
+# wget https://github.com/iredmail/iRedMail/archive/refs/tags/1.5.2.tar.gz 
+
+Uncompress iRedMail hasil download
+# tar zxf 1.5.2.tar.gz 
+
+Masuk pada dir iRedMail-1.5.2/ hasil extract dan jalakan script iRedMail.sh
+# cd /home/download/iRedMail-1.5.2/ 
+# bash iRedMail.sh 
+
+DB postgreySQL
+	username admin 	: postgres
+	password		: jagoan123
+Firt akun
+	username : postmaster@demo.domainsaya.com
+	password : jagoan123
+
+========ANTIVIRUS DAN ANTISPAM==================
+	
+##Setting clamav enabled antivirus scanning
+ vi /etc/amavis/conf.d/15-content_filter_mode
+	# uncomment untuk enable virus scanning
+	@bypass_virus_checks_maps = (
+		\%bypass_virus_checks, \@bypass_virus_checks_acl, \$bypass_virus_checks_re);
+	
+	@bypass_spam_checks_maps = (
+		\%bypass_spam_checks, \@bypass_spam_checks_acl, \$bypass_spam_checks_re);
+		
+##Restart service
+systemctl restart clamav-daemon amavis postfix
+
+============Integrasi Postfix dan Amavis==============
+Pada point ini postfix akan kita setting untuk mengirimkan email ke amavis untuk scanning email terlebih dahulu sebelum email dikirimkan, kemudian amavis akan mengirimkan kembali ke Postfix, setting pada bagian /etc/postfix/master.cf dan tambahkan pada baris code sebagai berikut :
+
+# Amavisd integration.
+smtp-amavis unix -  -   n   -   2  smtp
+    -o syslog_name=postfix/amavis
+    -o smtp_data_done_timeout=1200
+    -o smtp_send_xforward_command=yes
+    -o disable_dns_lookups=yes
+    -o max_use=20
+
+Setelah proses scanning email selesai, Amavis butuh mengirimkan kembali email tersebut ke postfix, untuk mengakomodir itu maka perlu disiapkan SMTP daemon untuk mengirimkan kembali email ke postfix, edit /etc/postfix/master.cf dan add pada bagian setelah command code diatas dengan baris berikut  :
+
+
+# smtp port used by Amavisd to re-inject scanned email back to Postfix
+127.0.0.1:10025 inet n  -   n   -   -  smtpd
+    -o syslog_name=postfix/10025
+    -o content_filter=
+    -o mynetworks_style=host
+    -o mynetworks=127.0.0.0/8
+    -o local_recipient_maps=
+    -o relay_recipient_maps=
+    -o strict_rfc821_envelopes=yes
+    -o smtp_tls_security_level=none
+    -o smtpd_tls_security_level=none
+    -o smtpd_restriction_classes=
+    -o smtpd_delay_reject=no
+    -o smtpd_client_restrictions=permit_mynetworks,reject
+    -o smtpd_helo_restrictions=
+    -o smtpd_sender_restrictions=
+    -o smtpd_recipient_restrictions=permit_mynetworks,reject
+    -o smtpd_end_of_data_restrictions=
+    -o smtpd_error_sleep_time=0
+    -o smtpd_soft_error_limit=1001
+    -o smtpd_hard_error_limit=1000
+    -o smtpd_client_connection_count_limit=0
+    -o smtpd_client_connection_rate_limit=0
+	-o receive_override_options=no_header_body_checks,no_unknown_recipient_checks,no_address_mappings
+	
+Setelah setting master.cf maka kita juga perlu mendefinisikan pada postfix main.cf untuk mapping postfix ke amavis, edit /etc/postfix/main.cf lalu tambahkan baris code sebagai berikut :
+## Amavisd + SpamAssassin + ClamAV
+content_filter = smtp-amavis:[127.0.0.1]:10024
+
+Lakukan restart untuk membaca perubahan yang dilakukan 
+# systemctl restart clamav-daemon amavis postfix
+
+================Testing antivirus scanning====================
+
+Download terlebih dahulu file testing yang mengandung virus
+# wget https://secure.eicar.org/eicar.com.txt
+
+Jalankan perintah sebagai berikut
+# echo "Test virus body" | mutt -a eicar.com.txt -s "This is virus" -- ahmad@domainsaya.com
+
+===============Testing antispam========================= 
+- Coba untuk mengirimkan sebuah email dengan include body string sebagai berikut kesalah satu email :
+X5O!P%@AP[4\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*
+
+jalankan perintah kirim email : mail ahmad@domainsaya.com
+Cc: 
+Subject: Email ke ahmad
+X5O!P%@AP[4\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*
+
+Refrensi :
+https://blog.za3k.com/installing-email-with-postfix-and-dovecot/
+https://github.com/postfixadmin/postfixadmin/blob/master/DOCUMENTS/Postfix-Dovecot-Postgresql-Example.md
+
+
+
+
+

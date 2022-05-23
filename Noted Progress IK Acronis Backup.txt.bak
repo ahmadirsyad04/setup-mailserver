@@ -1,0 +1,10 @@
+Catatan penyusunan update IK backup restore acronis
+1.Point 1 update ke vnc omadata/vnc jakarta
+2.Coba restore server legion (Microcloud SuperServer 5038ML-H24TRF) > Microcloud A Node 1 (Microcloud SuperServer 5038ML-H12TRF)
+3.Point saat partisi (pertanyaan apakah wajib dilakukan dan juga partisi harus di sesuikan seperti server existing yang akan di restore)> tanya standart partisi
+4.Langkah untuk partisi 2 kali point 10-11, apakah memang demikian?
+5.Point 9, setelah reload OS suruh cek apakah ada perubahan, mksd dari ini perubahan settingan ngarahnya seharusnya ke linux?
+6.Gunakan IP private diserver baru untuk melakukan mapping NFS acronis, karna ketika IP yang digunakan server baru IP public kemudian mapping NFS menggunakan IP Private, data backup tidak bisa terbaca
+
+
+Ngepartisi lagi server

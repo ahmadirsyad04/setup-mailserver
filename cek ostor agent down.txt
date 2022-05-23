@@ -1,0 +1,4 @@
+==Cek ostor agent s3==
+
+ostor-ctl agent-status
+systemctl restart ostor-agentd
